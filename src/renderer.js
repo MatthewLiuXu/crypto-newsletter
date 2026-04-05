@@ -930,7 +930,6 @@ const templateSource = `<!DOCTYPE html>
       <div class="logo-text" style="font-size: 16px;">Crypto <span style="color: #00c896;">Morning Briefing</span></div>
     </div>
     <div class="footer-copy">Generated from live market, media, and social feeds.</div>
-    <div class="footer-unsub">You&apos;re receiving this because you subscribed.</div>
   </div>
 </div>
 
