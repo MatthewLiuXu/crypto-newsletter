@@ -17,12 +17,16 @@ function parseJsonArray(value) {
 }
 
 export async function fetchPolymarketOdds(limit = 4) {
-  const requestLimit = Math.max(limit * 40, 500);
-  const res = await fetch(
-    `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=${requestLimit}&offset=0`
-  );
-  if (!res.ok) throw new Error(`Polymarket: ${res.status}`);
-  const markets = await res.json();
+  const pageLimit = 500;
+  const offsets = [0, 500, 1000];
+  const pages = await Promise.all(offsets.map(async (offset) => {
+    const res = await fetch(
+      `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=${pageLimit}&offset=${offset}`
+    );
+    if (!res.ok) throw new Error(`Polymarket: ${res.status}`);
+    return res.json();
+  }));
+  const markets = pages.flat();
 
   return markets
     .filter((market) => {

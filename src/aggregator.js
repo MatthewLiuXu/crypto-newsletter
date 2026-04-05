@@ -27,6 +27,27 @@ const RSS_EXCLUDE_PATTERNS = [
   /anthropic|claude|chatgpt|openai|llm|artificial intelligence|\bai\b/i,
 ];
 
+const HEADLINE_EXCLUDE_PATTERNS = [
+  /here['’]s what happened in crypto today/i,
+  /what happened in crypto today/i,
+  /\broundup\b/i,
+  /\bmorning brief(ing)?\b/i,
+];
+
+const HEADLINE_PENALTY_PATTERNS = [
+  { pattern: /\bexplainer\b/i, penalty: 2 },
+  { pattern: /\bhow\b.*\bwhy\b/i, penalty: 1 },
+  { pattern: /\bopinion\b/i, penalty: 1 },
+];
+
+const PREDICTION_EXCLUDE_PATTERNS = [
+  /\bgta\b/i,
+  /\bpresidential election\b/i,
+  /\bnomination\b/i,
+  /\bmasters tournament\b/i,
+  /\bpete hegseth\b/i,
+];
+
 const DEAL_PATTERNS = [
   { label: 'M&A', className: 'cat-ma', titleOnly: true, patterns: [/\bacqui(?:re|res|red|sition)\b/i, /\bmerger\b/i, /\btakeover\b/i] },
   { label: 'Capital', className: 'cat-vc', titleOnly: true, patterns: [/\bseed\b/i, /\bseries [abc]\b/i, /\bfunding\b/i, /\braise[sd]?\b/i, /\bbacked by\b/i, /\bcredit line\b/i] },
@@ -83,9 +104,17 @@ function selectDeepReads(headlines, count = 4, excludedLinks = new Set()) {
 }
 
 function headlineScore(item) {
+  if (HEADLINE_EXCLUDE_PATTERNS.some((pattern) => pattern.test(item.title))) {
+    return -1;
+  }
+
   const haystack = normalizeWhitespace(`${item.title} ${item.description}`);
-  const includeScore = RSS_INCLUDE_PATTERNS.reduce((score, pattern) => (
+  let includeScore = RSS_INCLUDE_PATTERNS.reduce((score, pattern) => (
     pattern.test(haystack) ? score + 1 : score
+  ), 0);
+
+  includeScore -= HEADLINE_PENALTY_PATTERNS.reduce((score, rule) => (
+    rule.pattern.test(haystack) ? score + rule.penalty : score
   ), 0);
 
   if (includeScore === 0 && RSS_EXCLUDE_PATTERNS.some((pattern) => pattern.test(haystack))) {
@@ -119,6 +148,79 @@ function selectDiverseArticles(items, count, maxPerSource = 2, excludedLinks = n
     for (const item of items) {
       if (excludedLinks.has(item.link) || selected.some((entry) => entry.link === item.link)) continue;
       selected.push(item);
+      if (selected.length === count) break;
+    }
+  }
+
+  return selected;
+}
+
+function inferHeadlineTopic(item) {
+  const haystack = articleText(item).toLowerCase();
+
+  if (/exploit|hack|breach|security|zachxbt|quantum|vulnerability|drift/i.test(haystack)) return 'security';
+  if (/sec|cftc|judge|court|lawsuit|regulation|policy|imf|kalshi|law/i.test(haystack)) return 'policy';
+  if (/polymarket|prediction markets?|kalshi/i.test(haystack)) return 'prediction';
+  if (/charles schwab|etf|spot trading|bank|treasury|institution|tradfi|asset treasur/i.test(haystack)) return 'adoption';
+  if (/stablecoin|tokenized|rails|blockchain arm|protocol|node client|infrastructure|validator/i.test(haystack)) return 'infrastructure';
+  if (/\bsolana\b|\bsol\b|megaeth|ethereum|ether\b/i.test(haystack)) return 'alt-l1';
+  if (/\bbitcoin\b|\bbtc\b/i.test(haystack)) return 'bitcoin';
+  return 'general';
+}
+
+function inferHeadlineAsset(item) {
+  const title = normalizeWhitespace(item.title).toLowerCase();
+  if (/\bbitcoin\b|\bbtc\b/.test(title)) return 'bitcoin';
+  if (/\bethereum\b|\bether\b|\beth\b/.test(title)) return 'ethereum';
+  if (/\bsolana\b|\bsol\b/.test(title)) return 'solana';
+  if (/stablecoin|usdc|usdt/.test(title)) return 'stablecoin';
+  return 'other';
+}
+
+function selectHeadlineArticles(items, count, excludedLinks = new Set()) {
+  const selected = [];
+  const sourceCounts = new Map();
+  const topicCounts = new Map();
+  const assetCounts = new Map();
+
+  const candidates = items.filter((item) => !excludedLinks.has(item.link));
+
+  for (const item of candidates) {
+    const sourceCount = sourceCounts.get(item.source) || 0;
+    const topic = inferHeadlineTopic(item);
+    const topicCount = topicCounts.get(topic) || 0;
+    const asset = inferHeadlineAsset(item);
+    const assetCount = assetCounts.get(asset) || 0;
+
+    if (sourceCount >= 2 || topicCount >= 1) continue;
+    if (asset === 'bitcoin' && assetCount >= 2) continue;
+
+    selected.push(item);
+    sourceCounts.set(item.source, sourceCount + 1);
+    topicCounts.set(topic, topicCount + 1);
+    assetCounts.set(asset, assetCount + 1);
+
+    if (selected.length === count) break;
+  }
+
+  if (selected.length < count) {
+    for (const item of candidates) {
+      if (selected.some((entry) => entry.link === item.link)) continue;
+
+      const sourceCount = sourceCounts.get(item.source) || 0;
+      const topic = inferHeadlineTopic(item);
+      const topicCount = topicCounts.get(topic) || 0;
+      const asset = inferHeadlineAsset(item);
+      const assetCount = assetCounts.get(asset) || 0;
+
+      if (sourceCount >= 2 || topicCount >= 2) continue;
+      if (asset === 'bitcoin' && assetCount >= 2) continue;
+
+      selected.push(item);
+      sourceCounts.set(item.source, sourceCount + 1);
+      topicCounts.set(topic, topicCount + 1);
+      assetCounts.set(asset, assetCount + 1);
+
       if (selected.length === count) break;
     }
   }
@@ -164,6 +266,10 @@ function inferTopicHint(title) {
   ];
 
   return hints.find((hint) => normalized.includes(hint)) || null;
+}
+
+function buildDealReserve(items, count = 2) {
+  return selectClassifiedArticles(items, DEAL_PATTERNS, count, new Set(), { dedupeTopics: true });
 }
 
 function selectClassifiedArticles(items, classifiers, count, excludedLinks = new Set(), { dedupeTopics = false } = {}) {
@@ -255,25 +361,40 @@ function buildChartOfTheDay(chains = []) {
 function selectPredictions(markets = [], count = 4) {
   const marketsWithMeta = markets
     .map((market) => {
+      const question = normalizeWhitespace(market.question);
       const endTime = new Date(market.endDate).getTime();
       const daysUntil = Number.isFinite(endTime) ? (endTime - Date.now()) / (24 * 60 * 60 * 1000) : Number.POSITIVE_INFINITY;
+      const relevanceScore =
+        (/launch|fdv|airdrop|mainnet|token|stablecoin|etf|coinbase/i.test(question) ? 4 : 0) +
+        (/\$\d+k|\$\d+m|\$\d+b|\$\d+t/i.test(question) ? 2 : 0) +
+        (/\bbitcoin\b|\bbtc\b|\bethereum\b|\beth\b|\bsolana\b|\bsol\b/i.test(question) ? 2 : 0) +
+        (daysUntil <= 30 ? 3 : daysUntil <= 120 ? 2 : 0) +
+        ((market.volume24hr || 0) >= 10000 ? 1 : 0) -
+        (/before/i.test(question) ? 1 : 0);
       const topic =
-        /\bbitcoin\b|\bbtc\b/i.test(market.question) ? 'bitcoin' :
-          /\bethereum\b|\beth\b/i.test(market.question) ? 'ethereum' :
-            /\bsolana\b|\bsol\b/i.test(market.question) ? 'solana' :
-              /megaeth/i.test(market.question) ? 'megaeth' :
-                /stablecoin|usdc|usdt/i.test(market.question) ? 'stablecoin' :
+        /megaeth/i.test(question) && /airdrop/i.test(question) ? 'megaeth-airdrop' :
+          /megaeth/i.test(question) && /fdv|market cap/i.test(question) ? 'megaeth-fdv' :
+            /opensea/i.test(question) ? 'opensea-fdv' :
+        /\bbitcoin\b|\bbtc\b/i.test(question) && /\$\d+/i.test(question) ? 'bitcoin-target' :
+          /\bbitcoin\b|\bbtc\b/i.test(question) ? 'bitcoin' :
+          /\bethereum\b|\beth\b/i.test(question) ? 'ethereum' :
+            /\bsolana\b|\bsol\b/i.test(question) ? 'solana' :
+                /stablecoin|usdc|usdt/i.test(question) ? 'stablecoin' :
                   'other';
 
       return {
         ...market,
         _daysUntil: daysUntil,
         _topic: topic,
+        _relevanceScore: relevanceScore,
       };
     })
-    .filter((market) => market._daysUntil > 0);
+    .filter((market) => market._daysUntil > 0)
+    .filter((market) => !PREDICTION_EXCLUDE_PATTERNS.some((pattern) => pattern.test(market.question)))
+    .filter((market) => market._relevanceScore > 0);
 
   marketsWithMeta.sort((a, b) => {
+    if (b._relevanceScore !== a._relevanceScore) return b._relevanceScore - a._relevanceScore;
     const aSoon = a._daysUntil <= 120 ? 0 : 1;
     const bSoon = b._daysUntil <= 120 ? 0 : 1;
     if (aSoon !== bSoon) return aSoon - bSoon;
@@ -290,7 +411,7 @@ function selectPredictions(markets = [], count = 4) {
     if (selected.length === count) break;
   }
 
-  return selected.map(({ _daysUntil, _topic, ...market }) => market);
+  return selected.map(({ _daysUntil, _topic, _relevanceScore, ...market }) => market);
 }
 
 function buildMarketNarrative({ prices = [], global = {}, fearGreed, stablecoinSupply }) {
@@ -372,20 +493,25 @@ export async function aggregateBriefing({ now = new Date() } = {}) {
     })
     .map(({ _index, _score, ...item }) => item);
 
-  const deals = selectClassifiedArticles(curatedRss, DEAL_PATTERNS, 4, new Set(), { dedupeTopics: true });
+  const reservedDeals = buildDealReserve(curatedRss, 2);
+  const headlines = selectHeadlineArticles(curatedRss, 6, new Set(reservedDeals.map((item) => item.link)));
+  const deals = selectClassifiedArticles(
+    curatedRss,
+    DEAL_PATTERNS,
+    4,
+    new Set(headlines.map((item) => item.link)),
+    { dedupeTopics: true }
+  );
   const regulationSecurity = selectClassifiedArticles(
     curatedRss,
     REG_SECURITY_PATTERNS,
     4,
-    new Set(deals.map((item) => item.link))
-    ,
+    new Set([
+      ...headlines.map((item) => item.link),
+      ...deals.map((item) => item.link),
+    ]),
     { dedupeTopics: true }
   );
-  const excludedHeadlineLinks = new Set([
-    ...deals.map((item) => item.link),
-    ...regulationSecurity.map((item) => item.link),
-  ]);
-  const headlines = selectDiverseArticles(curatedRss, 6, 2, excludedHeadlineLinks);
   const deepReads = selectDeepReads(
     curatedRss,
     4,

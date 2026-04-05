@@ -86,7 +86,6 @@ function buildViewModel(briefing) {
 
   return {
     displayDate: briefing.displayDate,
-    issueNumber: briefing.issueNumber,
     market: {
       prices,
       hasPrices: prices.length > 0,
@@ -707,7 +706,7 @@ const templateSource = `<!DOCTYPE html>
       <div class="logo-icon">CB</div>
       <div class="logo-text">Crypto <span>Morning Briefing</span></div>
     </div>
-    <div class="date-line">{{displayDate}} &nbsp;·&nbsp; Issue #{{issueNumber}}</div>
+    <div class="date-line">{{displayDate}}</div>
   </div>
 
   <div class="divider"></div>
@@ -934,9 +933,7 @@ const templateSource = `<!DOCTYPE html>
       <div class="logo-text" style="font-size: 16px;">Crypto <span style="color: #00c896;">Morning Briefing</span></div>
     </div>
     <div class="footer-links">
-      <a href="#" class="footer-link">Follow on X</a>
       <a href="#" class="footer-link">Archive</a>
-      <a href="#" class="footer-link">Share on X</a>
     </div>
     <div class="footer-copy">Generated from live market, media, and social feeds.</div>
     <div class="footer-unsub">You&apos;re receiving this because you subscribed.</div>
