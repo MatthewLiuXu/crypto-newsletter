@@ -2,22 +2,24 @@ import fetch from 'node-fetch';
 
 const API_KEY = process.env.GETXAPI_KEY || 'get-x-api-3073303f437bdaffeae239ebb37bed43c13444af08275f71';
 const BASE = 'https://api.getxapi.com';
+const DEFAULT_MAX_KOL_CALLS = Number(process.env.GETXAPI_MAX_KOL_CALLS || 7);
+const DEFAULT_MIN_KOL_CALLS = Number(process.env.GETXAPI_MIN_KOL_CALLS || 5);
 
 const headers = { Authorization: `Bearer ${API_KEY}` };
 
 export const KOL_LIST = [
-  { handle: 'coaborosdotcom', name: 'Cobie', category: 'trader' },
-  { handle: 'HsakaTrades', name: 'Hsaka', category: 'trader' },
   { handle: 'zachxbt', name: 'ZachXBT', category: 'on-chain' },
   { handle: 'MustStopMurad', name: 'Murad', category: 'macro' },
-  { handle: 'Rewkang', name: 'Andrew Kang', category: 'vc' },
   { handle: 'DefiIgnas', name: 'Ignas', category: 'defi' },
-  { handle: 'nic__carter', name: 'Nic Carter', category: 'macro' },
   { handle: 'CryptoCred', name: 'CryptoCred', category: 'ta' },
   { handle: 'lookonchain', name: 'Lookonchain', category: 'on-chain' },
-  { handle: 'EmberCN', name: 'Ember', category: 'on-chain' },
   { handle: 'WuBlockchain', name: 'Wu Blockchain', category: 'news' },
   { handle: 'tier10k', name: 'Tier10K', category: 'news' },
+  { handle: 'nic__carter', name: 'Nic Carter', category: 'macro' },
+  { handle: 'Rewkang', name: 'Andrew Kang', category: 'vc' },
+  { handle: 'HsakaTrades', name: 'Hsaka', category: 'trader' },
+  { handle: 'coaborosdotcom', name: 'Cobie', category: 'trader' },
+  { handle: 'EmberCN', name: 'Ember', category: 'on-chain' },
 ];
 
 function formatCount(n) {
@@ -26,12 +28,21 @@ function formatCount(n) {
   return String(n);
 }
 
+function cleanTweetText(text) {
+  const stripped = String(text || '')
+    .replace(/https?:\/\/\S+/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return stripped || String(text || '').trim();
+}
+
 function tweetToKOL(tweet, kolMeta) {
   return {
     name: kolMeta?.name || tweet.author?.name || tweet.author?.userName,
     handle: tweet.author?.userName,
     avatarInitial: (kolMeta?.name || tweet.author?.name || '?')[0].toUpperCase(),
-    quote: tweet.text,
+    quote: cleanTweetText(tweet.text),
     likes: formatCount(tweet.likeCount || 0),
     retweets: formatCount(tweet.retweetCount || 0),
     views: formatCount(tweet.viewCount || 0),
@@ -41,7 +52,12 @@ function tweetToKOL(tweet, kolMeta) {
 }
 
 export async function fetchKOLTweets(maxKOLs = 5) {
-  const promises = KOL_LIST.map(async (kol) => {
+  const maxCalls = Math.min(KOL_LIST.length, Math.max(maxKOLs, DEFAULT_MAX_KOL_CALLS));
+  const minCalls = Math.min(maxCalls, Math.max(1, DEFAULT_MIN_KOL_CALLS));
+  const results = [];
+  const recentTweets = [];
+
+  for (const kol of KOL_LIST.slice(0, maxCalls)) {
     try {
       const res = await fetch(`${BASE}/twitter/user/tweets?userName=${kol.handle}`, { headers });
       if (!res.ok) {
@@ -53,11 +69,12 @@ export async function fetchKOLTweets(maxKOLs = 5) {
           detail = '';
         }
 
-        return {
+        results.push({
           kol,
           tweets: [],
           error: `GetXAPI ${res.status}${detail ? `: ${detail}` : ''}`,
-        };
+        });
+        continue;
       }
 
       const data = await res.json();
@@ -65,23 +82,29 @@ export async function fetchKOLTweets(maxKOLs = 5) {
 
       // Filter to original tweets only (no replies), from last 48 hours
       const cutoff = Date.now() - 48 * 60 * 60 * 1000;
-      return {
-        kol,
-        tweets: tweets
+      const filteredTweets = tweets
         .filter(t => !t.isReply && new Date(t.createdAt).getTime() > cutoff)
-        .map(t => ({ ...t, _kolMeta: kol })),
+        .map(t => ({ ...t, _kolMeta: kol }));
+
+      results.push({
+        kol,
+        tweets: filteredTweets,
         error: null,
-      };
+      });
+      recentTweets.push(...filteredTweets);
+
+      if (results.length >= minCalls && recentTweets.length >= maxKOLs) {
+        break;
+      }
     } catch {
-      return {
+      results.push({
         kol,
         tweets: [],
         error: 'GetXAPI request failed',
-      };
+      });
     }
-  });
+  }
 
-  const results = await Promise.all(promises);
   const allTweets = results.flatMap((result) => result.tweets);
   const errors = results.filter((result) => result.error);
 

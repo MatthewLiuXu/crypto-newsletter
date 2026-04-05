@@ -593,16 +593,26 @@ const templateSource = `<!DOCTYPE html>
     color: rgba(255,255,255,0.6);
     padding-left: 50px;
     font-style: italic;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   .kol-engagement {
     display: flex;
     gap: 16px;
+    flex-wrap: wrap;
     padding-left: 50px;
     margin-top: 8px;
     font-family: 'Space Mono', monospace;
     font-size: 10px;
     color: rgba(255,255,255,0.25);
     letter-spacing: 0.5px;
+  }
+  .kol-link {
+    color: #1d9bf0;
+    text-decoration: none;
+  }
+  .kol-link:hover {
+    text-decoration: underline;
   }
 
   .extra-read {
@@ -657,20 +667,6 @@ const templateSource = `<!DOCTYPE html>
     background: rgba(0,0,0,0.3);
     border-top: 1px solid rgba(255,255,255,0.04);
     text-align: center;
-  }
-  .footer-links {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
-    margin-bottom: 16px;
-  }
-  .footer-link {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: rgba(255,255,255,0.3);
-    text-decoration: none;
-    letter-spacing: 1px;
-    text-transform: uppercase;
   }
   .footer-copy {
     font-size: 12px;
@@ -897,6 +893,7 @@ const templateSource = `<!DOCTYPE html>
         <span>♡ {{likes}}</span>
         <span>⟲ {{retweets}}</span>
         <span>👁 {{views}} views</span>
+        <a class="kol-link" href="{{tweetUrl}}" target="_blank" rel="noopener noreferrer">View post</a>
       </div>
     </div>
     {{/each}}
@@ -931,9 +928,6 @@ const templateSource = `<!DOCTYPE html>
     <div class="logo-row" style="justify-content: center; margin-bottom: 16px;">
       <div class="logo-icon" style="width: 32px; height: 32px; font-size: 16px; border-radius: 8px;">CB</div>
       <div class="logo-text" style="font-size: 16px;">Crypto <span style="color: #00c896;">Morning Briefing</span></div>
-    </div>
-    <div class="footer-links">
-      <a href="#" class="footer-link">Archive</a>
     </div>
     <div class="footer-copy">Generated from live market, media, and social feeds.</div>
     <div class="footer-unsub">You&apos;re receiving this because you subscribed.</div>
