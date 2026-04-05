@@ -1,24 +1,11 @@
 import 'dotenv/config';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { mkdir, writeFile } from 'node:fs/promises';
-import { aggregateBriefing } from './aggregator.js';
-import { renderBriefing } from './renderer.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, '..');
-const outputDir = path.join(projectRoot, 'output');
+import { generateBriefingFiles } from './generator.js';
 
 async function main() {
-  const briefing = await aggregateBriefing();
-  const html = renderBriefing(briefing);
-  const outputPath = path.join(outputDir, `briefing-${briefing.date}.html`);
+  const { briefing, datedOutputPath, latestOutputPath } = await generateBriefingFiles();
 
-  await mkdir(outputDir, { recursive: true });
-  await writeFile(outputPath, html, 'utf8');
-
-  console.log(`Generated ${outputPath}`);
+  console.log(`Generated ${datedOutputPath}`);
+  console.log(`Updated ${latestOutputPath}`);
   console.log(`Date: ${briefing.displayDate} · Issue #${briefing.issueNumber}`);
   console.log(`Prices: ${briefing.market.prices.length}`);
   console.log(`Headlines: ${briefing.headlines.length}`);
