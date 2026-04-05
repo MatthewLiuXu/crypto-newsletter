@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crypto Morning Briefing</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0f;
+    font-family: 'Outfit', sans-serif;
+    color: #e0e0e8;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .email-wrapper {
+    max-width: 680px;
+    margin: 0 auto;
+    background: #0f0f18;
+    border-left: 1px solid rgba(255,255,255,0.04);
+    border-right: 1px solid rgba(255,255,255,0.04);
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #0a0a12 0%, #12121f 50%, #0d1a2a 100%);
+    padding: 40px 36px 32px;
+    border-bottom: 1px solid rgba(80, 200, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(0, 200, 150, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 30%;
+    width: 300px; height: 100px;
+    background: radial-gradient(ellipse, rgba(80, 130, 255, 0.04) 0%, transparent 70%);
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #00c896 0%, #0088ff 100%);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 800;
+    color: #fff;
+    letter-spacing: -1px;
+    box-shadow: 0 4px 20px rgba(0, 200, 150, 0.2);
+  }
+  .logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+  }
+  .logo-text span {
+    color: #00c896;
+  }
+
+  .date-line {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Section Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(0, 200, 150, 0.15) 20%, rgba(0, 136, 255, 0.15) 80%, transparent 100%);
+    margin: 0;
+  }
+
+  /* Market Snapshot */
+  .section {
+    padding: 32px 36px;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #00c896;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(0,200,150,0.2), transparent);
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 20px;
+    line-height: 1.3;
+  }
+
+  /* Price Cards */
+  .price-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .price-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .price-card:hover {
+    border-color: rgba(0, 200, 150, 0.15);
+  }
+  .price-symbol {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+  }
+  .price-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .price-change {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .price-change.up { color: #00c896; }
+  .price-change.down { color: #ff4d6a; }
+  .price-change.flat { color: rgba(255,255,255,0.35); }
+
+  /* Mini stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-item {
+    text-align: center;
+    padding: 12px 8px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+  }
+  .stat-label {
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .stat-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  /* Market narrative */
+  .market-narrative {
+    font-size: 15px;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.65);
+    padding: 20px 24px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+    border-left: 3px solid rgba(0, 200, 150, 0.3);
+  }
+  .market-narrative strong {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  /* Headlines */
+  .headline-list {
+    list-style: none;
+    padding: 0;
+  }
+  .headline-item {
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .headline-item:last-child {
+    border-bottom: none;
+  }
+  .headline-bullet {
+    width: 6px; height: 6px;
+    min-width: 6px;
+    background: #00c896;
+    border-radius: 50%;
+    margin-top: 8px;
+  }
+  .headline-text {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.7);
+  }
+  .headline-text strong {
+    color: #ffffff;
+    font-weight: 600;
+  }
+  .source-tag {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(0, 200, 150, 0.6);
+    background: rgba(0, 200, 150, 0.06);
+    border: 1px solid rgba(0, 200, 150, 0.1);
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+  }
+
+  /* Category label */
+  .category-tag {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+  }
+  .cat-vc { background: rgba(130, 80, 255, 0.1); color: #a78bfa; border: 1px solid rgba(130,80,255,0.15); }
+  .cat-ma { background: rgba(255, 180, 50, 0.1); color: #fbbf24; border: 1px solid rgba(255,180,50,0.15); }
+  .cat-launch { background: rgba(0, 200, 150, 0.1); color: #00c896; border: 1px solid rgba(0,200,150,0.15); }
+  .cat-reg { background: rgba(255, 77, 106, 0.1); color: #ff4d6a; border: 1px solid rgba(255,77,106,0.15); }
+  .cat-security { background: rgba(255, 100, 50, 0.1); color: #ff8844; border: 1px solid rgba(255,100,50,0.15); }
+
+  /* Deal cards */
+  .deal-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+  }
+  .deal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .deal-company {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .deal-amount {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: #00c896;
+  }
+  .deal-details {
+    font-size: 13.5px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.6;
+  }
+  .deal-details strong {
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* Chart section */
+  .chart-section {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .chart-caption {
+    padding: 20px 24px 16px;
+    font-size: 14px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.6);
+  }
+  .chart-caption strong {
+    color: #fff;
+  }
+  .chart-img-container {
+    padding: 0 24px 20px;
+  }
+  .chart-placeholder {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: linear-gradient(180deg, rgba(0,200,150,0.03) 0%, rgba(0,136,255,0.03) 100%);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .chart-placeholder svg {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0; left: 0;
+  }
+  .chart-source {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.25);
+    padding: 12px 24px 16px;
+    letter-spacing: 0.5px;
+  }
+
+  /* On-chain data */
+  .onchain-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .onchain-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .onchain-label {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .onchain-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 2px;
+  }
+  .onchain-delta {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+  }
+
+  /* Twitter KOL section */
+  .kol-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 12px;
+  }
+  .kol-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .kol-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1d9bf0 0%, #0d6ebd 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .kol-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .kol-handle {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: #1d9bf0;
+    letter-spacing: 0.3px;
+  }
+  .kol-quote {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.6);
+    padding-left: 50px;
+    font-style: italic;
+  }
+  .kol-quote strong {
+    color: #fff;
+    font-style: normal;
+  }
+  .kol-engagement {
+    display: flex;
+    gap: 16px;
+    padding-left: 50px;
+    margin-top: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 0.5px;
+  }
+  .twitter-source {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(29, 155, 240, 0.7);
+    background: rgba(29, 155, 240, 0.08);
+    border: 1px solid rgba(29, 155, 240, 0.12);
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+  }
+
+  /* Extra reads */
+  .extra-read {
+    display: flex;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    align-items: flex-start;
+  }
+  .extra-read:last-child { border-bottom: none; }
+  .read-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: rgba(0, 200, 150, 0.15);
+    min-width: 40px;
+    line-height: 1;
+    padding-top: 2px;
+  }
+  .read-content {}
+  .read-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+  .read-desc {
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.5;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 32px 36px;
+    background: rgba(0,0,0,0.3);
+    border-top: 1px solid rgba(255,255,255,0.04);
+    text-align: center;
+  }
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 16px;
+  }
+  .footer-link {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    text-decoration: none;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .footer-link:hover { color: #00c896; }
+  .footer-copy {
+    font-size: 12px;
+    color: rgba(255,255,255,0.15);
+    margin-top: 12px;
+  }
+  .footer-unsub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+    margin-top: 12px;
+  }
+  .footer-unsub a {
+    color: rgba(255,255,255,0.3);
+    text-decoration: underline;
+  }
+
+  /* Prediction market section */
+  .prediction-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .prediction-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .prediction-question {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .prediction-bar-bg {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .prediction-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #00c896, #0088ff);
+  }
+  .prediction-odds {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .prediction-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 0.5px;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .section { padding: 24px 20px; }
+    .header { padding: 28px 20px 24px; }
+    .price-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: 1fr; }
+    .onchain-grid { grid-template-columns: 1fr; }
+    .prediction-grid { grid-template-columns: 1fr; }
+    .price-value { font-size: 20px; }
+    .footer { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="email-wrapper">
+
+  <!-- ============ HEADER ============ -->
+  <div class="header">
+    <div class="logo-row">
+      <div class="logo-icon">CB</div>
+      <div class="logo-text">Crypto <span>Morning Briefing</span></div>
+    </div>
+    <div class="date-line">Wednesday, July 23, 2025 &nbsp;·&nbsp; Issue #147</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ============ MARKET SNAPSHOT ============ -->
+  <div class="section">
+    <div class="section-label">Market Snapshot</div>
+
+    <div class="price-grid">
+      <div class="price-card">
+        <div class="price-symbol">BTC</div>
+        <div class="price-value">$119,042</div>
+        <div class="price-change flat">▸ −0.3%</div>
+      </div>
+      <div class="price-card">
+        <div class="price-symbol">ETH</div>
+        <div class="price-value">$3,648</div>
+        <div class="price-change down">▾ −1.2%</div>
+      </div>
+      <div class="price-card">
+        <div class="price-symbol">SOL</div>
+        <div class="price-value">$201.40</div>
+        <div class="price-change up">▴ +4.7%</div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-label">Total Mkt Cap</div>
+        <div class="stat-value">$4.32T</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">BTC Dominance</div>
+        <div class="stat-value">58.4%</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Fear & Greed</div>
+        <div class="stat-value" style="color: #00c896;">72 — Greed</div>
+      </div>
+    </div>
+
+    <div class="market-narrative">
+      Markets in <strong>wait-and-see mode</strong> ahead of Trump's August 1 tariff deadline. BTC holding $119K in a tight range while <strong>Solana surged past $200</strong> on renewed DeFi traction — flipping BNB for the #5 market cap spot again. ETH dipped slightly after strong recent gains but the broader trend remains bullish after a month-long rally. CT sentiment leaning cautiously bullish — <strong>@HsakaTrades</strong> and <strong>@CryptoCred</strong> both flagged the SOL breakout before the move.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ============ HEADLINES ============ -->
+  <div class="section">
+    <div class="section-label">Headlines</div>
+
+    <ul class="headline-list">
+      <li class="headline-item">
+        <div class="headline-bullet"></div>
+        <div class="headline-text">
+          <strong>Citadel Securities</strong> warned the SEC that tokenized equities could siphon liquidity from traditional markets, pushing back against blockchain-based stock trading <span class="source-tag">The Block</span>
+        </div>
+      </li>
+      <li class="headline-item">
+        <div class="headline-bullet"></div>
+        <div class="headline-text">
+          <strong>PNC Bank</strong> partners with Coinbase to launch Bitcoin and crypto services for its customers, joining a growing wave of TradFi-crypto integration <span class="source-tag">Bitcoin Mag</span>
+        </div>
+      </li>
+      <li class="headline-item">
+        <div class="headline-bullet"></div>
+        <div class="headline-text">
+          <strong>FBI halts investigation</strong> into Kraken co-founder Jesse Powell — the probe, which looked at possible sanctions violations, has been dropped <span class="source-tag">Decrypt</span>
+        </div>
+      </li>
+      <li class="headline-item">
+        <div class="headline-bullet"></div>
+        <div class="headline-text">
+          <strong>SpaceX</strong> shifted $153M in Bitcoin in its first on-chain move since 2022, sparking speculation about treasury strategy changes <span class="twitter-source">@zachxbt</span>
+        </div>
+      </li>
+      <li class="headline-item">
+        <div class="headline-bullet"></div>
+        <div class="headline-text">
+          <strong>CryptoPunks</strong> leading the charge as Ethereum-based NFTs rally on the back of ETH's strong price performance this month <span class="twitter-source">@punk9059</span>
+        </div>
+      </li>
+      <li class="headline-item">
+        <div class="headline-bullet"></div>
+        <div class="headline-text">
+          Scott Bessent says <strong>Powell</strong> doesn't need to resign but should conduct an internal review — the Trump-Fed clash continues to brew <span class="source-tag">CNBC</span>
+        </div>
+      </li>
+      <li class="headline-item">
+        <div class="headline-bullet"></div>
+        <div class="headline-text">
+          SEC approved conversion of <strong>Bitwise's</strong> cryptocurrency index fund to an ETP, then quickly hit pause on the process <span class="source-tag">The Block</span>
+        </div>
+      </li>
+      <li class="headline-item">
+        <div class="headline-bullet"></div>
+        <div class="headline-text">
+          <strong>21Shares</strong> files for an exchange-traded product tracking ONDO, the real-world asset tokenization protocol <span class="source-tag">The Block</span>
+        </div>
+      </li>
+      <li class="headline-item">
+        <div class="headline-bullet"></div>
+        <div class="headline-text">
+          <strong>PUMP token</strong> has dropped 45% from its all-time high and is now trading below its initial coin offering valuation <span class="twitter-source">@DefiIgnas</span>
+        </div>
+      </li>
+      <li class="headline-item">
+        <div class="headline-bullet"></div>
+        <div class="headline-text">
+          <strong>Compass Point</strong> downgrades Circle (CRCL) to "sell" as analysts question the stablecoin issuer's margins post-GENIUS Act <span class="twitter-source">@nic__carter</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ============ DEALS & LAUNCHES ============ -->
+  <div class="section">
+    <div class="section-label">Deals & Launches</div>
+
+    <div class="deal-card">
+      <div class="category-tag cat-vc">Venture Capital</div>
+      <div class="deal-header">
+        <div class="deal-company">Poseidon</div>
+        <div class="deal-amount">$15M Seed</div>
+      </div>
+      <div class="deal-details">
+        Led by <strong>a16z crypto</strong>. Building infrastructure for on-chain derivatives.
+      </div>
+    </div>
+
+    <div class="deal-card">
+      <div class="category-tag cat-vc">Venture Capital</div>
+      <div class="deal-header">
+        <div class="deal-company">Mercurity Fintech</div>
+        <div class="deal-amount">$200M Credit Line</div>
+      </div>
+      <div class="deal-details">
+        Equity line of credit from <strong>Solana Ventures</strong> to build a Solana-based digital asset treasury.
+      </div>
+    </div>
+
+    <div class="deal-card">
+      <div class="category-tag cat-ma">M&A</div>
+      <div class="deal-header">
+        <div class="deal-company">Archax → Deutsche Digital Assets</div>
+        <div class="deal-amount">Acquisition</div>
+      </div>
+      <div class="deal-details">
+        UK-based Archax completes acquisition of German crypto ETP manager DDA, expanding regulated infrastructure across Europe.
+      </div>
+    </div>
+
+    <div class="deal-card">
+      <div class="category-tag cat-launch">Launch</div>
+      <div class="deal-header">
+        <div class="deal-company">Telegram — TON Wallet</div>
+        <div class="deal-amount">US Launch</div>
+      </div>
+      <div class="deal-details">
+        Telegram launches native crypto wallet in the US, going head-first into payments via the TON blockchain.
+      </div>
+    </div>
+
+    <div class="deal-card">
+      <div class="category-tag cat-launch">Launch</div>
+      <div class="deal-header">
+        <div class="deal-company">Coinbase — Perpetual Futures</div>
+        <div class="deal-amount">US Traders</div>
+      </div>
+      <div class="deal-details">
+        CFTC-regulated perpetual futures now available for US traders on Coinbase. A major step for on-shore derivatives.
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ============ ON-CHAIN DATA ============ -->
+  <div class="section">
+    <div class="section-label">On-Chain Pulse</div>
+
+    <div class="onchain-grid">
+      <div class="onchain-card">
+        <div class="onchain-label">Stablecoin Supply</div>
+        <div class="onchain-value">$261B</div>
+        <div class="onchain-delta up" style="color: #00c896;">▴ ATH</div>
+      </div>
+      <div class="onchain-card">
+        <div class="onchain-label">ETH Gas Limit</div>
+        <div class="onchain-value">45M</div>
+        <div class="onchain-delta" style="color: rgba(255,255,255,0.35);">New block limit reached</div>
+      </div>
+      <div class="onchain-card">
+        <div class="onchain-label">CEX Daily Volume</div>
+        <div class="onchain-value">$72B</div>
+        <div class="onchain-delta" style="color: rgba(255,255,255,0.35);">vs $160B+ peak mania</div>
+      </div>
+      <div class="onchain-card">
+        <div class="onchain-label">SOL Mkt Cap Rank</div>
+        <div class="onchain-value">#5</div>
+        <div class="onchain-delta up" style="color: #00c896;">Flipped BNB ▴</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ============ CHART OF THE DAY ============ -->
+  <div class="section">
+    <div class="section-label">Chart of the Day</div>
+
+    <div class="chart-section">
+      <div class="chart-caption">
+        <strong>BTC at all-time highs but exchange volumes are half of peak mania.</strong> $72B daily average now vs $160B+ during the last cycle peak. Price 2x above early-cycle levels — volume isn't keeping up.
+      </div>
+      <div class="chart-img-container">
+        <div class="chart-placeholder">
+          <svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">
+            <!-- Grid lines -->
+            <line x1="60" y1="40" x2="60" y2="260" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+            <line x1="60" y1="260" x2="570" y2="260" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="60" y1="200" x2="570" y2="200" stroke="rgba(255,255,255,0.03)" stroke-width="1" stroke-dasharray="4,4"/>
+            <line x1="60" y1="140" x2="570" y2="140" stroke="rgba(255,255,255,0.03)" stroke-width="1" stroke-dasharray="4,4"/>
+            <line x1="60" y1="80" x2="570" y2="80" stroke="rgba(255,255,255,0.03)" stroke-width="1" stroke-dasharray="4,4"/>
+
+            <!-- Y-axis labels -->
+            <text x="50" y="264" fill="rgba(255,255,255,0.2)" font-size="10" text-anchor="end" font-family="monospace">$0</text>
+            <text x="50" y="204" fill="rgba(255,255,255,0.2)" font-size="10" text-anchor="end" font-family="monospace">$50B</text>
+            <text x="50" y="144" fill="rgba(255,255,255,0.2)" font-size="10" text-anchor="end" font-family="monospace">$100B</text>
+            <text x="50" y="84" fill="rgba(255,255,255,0.2)" font-size="10" text-anchor="end" font-family="monospace">$150B</text>
+
+            <!-- X-axis labels -->
+            <text x="100" y="280" fill="rgba(255,255,255,0.2)" font-size="10" text-anchor="middle" font-family="monospace">2021</text>
+            <text x="230" y="280" fill="rgba(255,255,255,0.2)" font-size="10" text-anchor="middle" font-family="monospace">2022</text>
+            <text x="360" y="280" fill="rgba(255,255,255,0.2)" font-size="10" text-anchor="middle" font-family="monospace">2023</text>
+            <text x="490" y="280" fill="rgba(255,255,255,0.2)" font-size="10" text-anchor="middle" font-family="monospace">2024-25</text>
+
+            <!-- Volume area -->
+            <defs>
+              <linearGradient id="volGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#00c896" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#00c896" stop-opacity="0.02"/>
+              </linearGradient>
+            </defs>
+            <path d="M80,240 Q100,230 120,220 Q150,180 170,140 Q185,75 200,65 Q220,85 240,130 Q260,180 280,210 Q300,230 320,235 Q340,230 360,225 Q380,210 400,200 Q420,190 440,175 Q460,165 480,160 Q500,155 520,150 Q540,148 555,145 L555,260 L80,260 Z" fill="url(#volGrad)"/>
+            <path d="M80,240 Q100,230 120,220 Q150,180 170,140 Q185,75 200,65 Q220,85 240,130 Q260,180 280,210 Q300,230 320,235 Q340,230 360,225 Q380,210 400,200 Q420,190 440,175 Q460,165 480,160 Q500,155 520,150 Q540,148 555,145" fill="none" stroke="#00c896" stroke-width="2"/>
+
+            <!-- Peak annotation -->
+            <circle cx="200" cy="65" r="4" fill="#00c896" opacity="0.8"/>
+            <line x1="200" y1="48" x2="200" y2="61" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+            <text x="200" y="42" fill="rgba(255,255,255,0.5)" font-size="10" text-anchor="middle" font-family="monospace">$160B+</text>
+
+            <!-- Current annotation -->
+            <circle cx="555" cy="145" r="4" fill="#0088ff" opacity="0.8"/>
+            <line x1="555" y1="128" x2="555" y2="141" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+            <text x="545" y="122" fill="rgba(255,255,255,0.5)" font-size="10" text-anchor="end" font-family="monospace">$72B now</text>
+          </svg>
+        </div>
+      </div>
+      <div class="chart-source">Source: @fintechfrank on X · CEX daily volume (30d avg)</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ============ REGULATION & SECURITY ============ -->
+  <div class="section">
+    <div class="section-label">Regulation & Security</div>
+
+    <ul class="headline-list">
+      <li class="headline-item">
+        <div class="headline-bullet" style="background: #ff4d6a;"></div>
+        <div class="headline-text">
+          <span class="category-tag cat-reg">Regulation</span><br>
+          <strong>Coinbase UK boss</strong> says country has "second mover advantage" for crypto regulation, positioning Britain to learn from US missteps <span class="source-tag">FN London</span>
+        </div>
+      </li>
+      <li class="headline-item">
+        <div class="headline-bullet" style="background: #ff4d6a;"></div>
+        <div class="headline-text">
+          <span class="category-tag cat-reg">Regulation</span><br>
+          Web3 firm <strong>Hashed Emergent</strong> proposes "COINS Act" model law for crypto regulation in India <span class="source-tag">CryptoRank</span>
+        </div>
+      </li>
+      <li class="headline-item">
+        <div class="headline-bullet" style="background: #ff8844;"></div>
+        <div class="headline-text">
+          <span class="category-tag cat-security">Cybersecurity</span><br>
+          Over <strong>3,500 websites</strong> found running a hidden Monero mining script delivered through a malicious injection chain <span class="source-tag">Decrypt</span>
+        </div>
+      </li>
+      <li class="headline-item">
+        <div class="headline-bullet" style="background: #ff8844;"></div>
+        <div class="headline-text">
+          <span class="category-tag cat-security">Cybersecurity</span><br>
+          US seeks to recover <strong>$7.1M in crypto</strong> tied to oil and gas fraud scheme <span class="source-tag">The Block</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ============ PREDICTION MARKETS ============ -->
+  <div class="section">
+    <div class="section-label">Prediction Markets</div>
+
+    <div class="prediction-grid">
+      <div class="prediction-card">
+        <div class="prediction-question">Will BTC close above $125K by August 1?</div>
+        <div class="prediction-bar-bg"><div class="prediction-bar-fill" style="width: 34%;"></div></div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <div class="prediction-odds">34%</div>
+          <div class="prediction-label">Polymarket</div>
+        </div>
+      </div>
+      <div class="prediction-card">
+        <div class="prediction-question">Fed rate cut at September FOMC?</div>
+        <div class="prediction-bar-bg"><div class="prediction-bar-fill" style="width: 62%;"></div></div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <div class="prediction-odds">62%</div>
+          <div class="prediction-label">Kalshi</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ============ TWITTER KOLS ============ -->
+  <div class="section">
+    <div class="section-label">Twitter KOLs — What CT Is Saying</div>
+
+    <div class="kol-card">
+      <div class="kol-header">
+        <div class="kol-avatar">C</div>
+        <div>
+          <div class="kol-name">Cobie</div>
+          <div class="kol-handle">@coaborosdotcom</div>
+        </div>
+      </div>
+      <div class="kol-quote">
+        "BTC holding $119K on <strong>half the volume</strong> of last cycle's peak is the most bullish chart in crypto right now. Silent accumulation > mania volume."
+      </div>
+      <div class="kol-engagement">
+        <span>♡ 12.4K</span>
+        <span>⟲ 3.1K</span>
+        <span>👁 1.8M views</span>
+      </div>
+    </div>
+
+    <div class="kol-card">
+      <div class="kol-header">
+        <div class="kol-avatar">H</div>
+        <div>
+          <div class="kol-name">Hsaka</div>
+          <div class="kol-handle">@HsakaTrades</div>
+        </div>
+      </div>
+      <div class="kol-quote">
+        "SOL flipping BNB again while no one's paying attention. <strong>DeFi TVL on Solana up 40% in 30 days</strong> — this isn't a meme coin rally, it's fundamental."
+      </div>
+      <div class="kol-engagement">
+        <span>♡ 8.7K</span>
+        <span>⟲ 2.4K</span>
+        <span>👁 960K views</span>
+      </div>
+    </div>
+
+    <div class="kol-card">
+      <div class="kol-header">
+        <div class="kol-avatar">Z</div>
+        <div>
+          <div class="kol-name">ZachXBT</div>
+          <div class="kol-handle">@zachxbt</div>
+        </div>
+      </div>
+      <div class="kol-quote">
+        "The SpaceX wallet move isn't a sell signal. Treasury rotation into <strong>cold storage</strong> — I've traced the addresses. Same custodian, new multisig."
+      </div>
+      <div class="kol-engagement">
+        <span>♡ 15.2K</span>
+        <span>⟲ 4.8K</span>
+        <span>👁 2.3M views</span>
+      </div>
+    </div>
+
+    <div class="kol-card">
+      <div class="kol-header">
+        <div class="kol-avatar">M</div>
+        <div>
+          <div class="kol-name">Murad</div>
+          <div class="kol-handle">@MustStopMurad</div>
+        </div>
+      </div>
+      <div class="kol-quote">
+        "Stablecoin supply at <strong>$261B ATH</strong> while exchanges hold less BTC than any point since 2018. Dry powder is loaded. The supply shock thesis hasn't changed."
+      </div>
+      <div class="kol-engagement">
+        <span>♡ 9.1K</span>
+        <span>⟲ 2.9K</span>
+        <span>👁 1.1M views</span>
+      </div>
+    </div>
+
+    <div class="kol-card">
+      <div class="kol-header">
+        <div class="kol-avatar">A</div>
+        <div>
+          <div class="kol-name">Andrew Kang</div>
+          <div class="kol-handle">@Rewkang</div>
+        </div>
+      </div>
+      <div class="kol-quote">
+        "Coinbase launching CFTC-regulated perps in the US is <strong>the most underrated headline this week</strong>. On-shore derivatives = institutional flow. This changes the game for ETH and SOL."
+      </div>
+      <div class="kol-engagement">
+        <span>♡ 6.3K</span>
+        <span>⟲ 1.7K</span>
+        <span>👁 720K views</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ============ EXTRA READS ============ -->
+  <div class="section">
+    <div class="section-label">Deep Reads</div>
+
+    <div class="extra-read">
+      <div class="read-number">01</div>
+      <div class="read-content">
+        <div class="read-title">Can Trump Fire Fed Chair Jerome Powell? And What Does That Mean For Crypto?</div>
+        <div class="read-desc">The public clash between the President and the Fed is escalating — a breakdown of what it means for digital assets. &nbsp;<span class="source-tag">Decrypt</span></div>
+      </div>
+    </div>
+    <div class="extra-read">
+      <div class="read-number">02</div>
+      <div class="read-content">
+        <div class="read-title">🧵 @MustStopMurad: "The Supply Shock No One Is Pricing In"</div>
+        <div class="read-desc">24-tweet thread breaking down exchange BTC reserves vs stablecoin inflows — viral with 2.3M views and counting. &nbsp;<span class="twitter-source">@MustStopMurad</span></div>
+      </div>
+    </div>
+    <div class="extra-read">
+      <div class="read-number">03</div>
+      <div class="read-content">
+        <div class="read-title">🧵 @MessariCrypto: Stablecoin Usage Soars in Emerging Markets</div>
+        <div class="read-desc">Research thread shows stablecoin adoption accelerating in Latin America and Southeast Asia for remittances and daily transactions. &nbsp;<span class="twitter-source">@MessariCrypto</span></div>
+      </div>
+    </div>
+    <div class="extra-read">
+      <div class="read-number">04</div>
+      <div class="read-content">
+        <div class="read-title">🧵 @DefiIgnas: Inside Pump.Fun's Revenue Machine</div>
+        <div class="read-desc">$774M revenue, 12M tokens launched, and a $600M raise in 12 minutes — how Pump.Fun became crypto's most profitable launchpad. &nbsp;<span class="twitter-source">@DefiIgnas</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ============ FOOTER ============ -->
+  <div class="footer">
+    <div class="logo-row" style="justify-content: center; margin-bottom: 16px;">
+      <div class="logo-icon" style="width: 32px; height: 32px; font-size: 16px; border-radius: 8px;">CB</div>
+      <div class="logo-text" style="font-size: 16px;">Crypto <span style="color: #00c896;">Morning Briefing</span></div>
+    </div>
+    <div class="footer-links">
+      <a href="#" class="footer-link">Follow on X</a>
+      <a href="#" class="footer-link">Archive</a>
+      <a href="#" class="footer-link">Share on X</a>
+    </div>
+    <div class="footer-copy">Built with Claude · Automated daily at 7:00 AM ET</div>
+    <div class="footer-unsub">
+      You're receiving this because you subscribed. <a href="#">Unsubscribe</a>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
