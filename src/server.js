@@ -108,8 +108,9 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-await ensureLatestBriefing();
-
 server.listen(PORT, HOST, () => {
   console.log(`Server listening on http://${HOST}:${PORT}`);
+  ensureLatestBriefing().catch((err) => {
+    console.error('Background generation failed:', err);
+  });
 });
