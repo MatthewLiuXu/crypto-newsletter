@@ -1,0 +1,6 @@
+[deploy]
+startCommand = "npm start"
+
+[cron]
+schedule = "0 8 * * *"
+command = "npm run generate"
